@@ -14,12 +14,12 @@ DROP TABLE IF EXISTS dim_season;
 
 
 CREATE TABLE dim_player_static (
-    player_id PRIMARY KEY,
+    player_id SERIAL PRIMARY KEY,
     player_name VARCHAR(100),
     draft_number INT,
     draft_round INT,
     draft_year INT,
-    height VARCHAR(10),
+    height FLOAT,
     college VARCHAR(100),
     country VARCHAR(50)
 );
@@ -100,7 +100,7 @@ CREATE TABLE dim_player_performance (
     performance_id SERIAL PRIMARY KEY,
     game_id INT,
     player_id INT,
-    min_played INT,
+    min_played varchar(10),
     field_goal_made INT,
     field_goal_attempt INT,
     free_throw_made INT,
@@ -121,10 +121,12 @@ CREATE TABLE dim_ranking (
     ranking_id SERIAL PRIMARY KEY,
     team_id INT,
     season_id INT,
+    date_id INT,
     conference varchar(10),
     game_played INT,
     wins INT,
     lose INT,
     FOREIGN KEY (team_id) REFERENCES dim_team(team_id),
-    FOREIGN KEY (season_id) REFERENCES dim_season(season_id)
+    FOREIGN KEY (season_id) REFERENCES dim_season(season_id),
+    FOREIGN KEY (date_id) REFERENCES dim_date(date_id)
 );
