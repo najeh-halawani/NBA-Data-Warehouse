@@ -1,0 +1,29 @@
+database NOTE:
+bi 2aleb el data tb3 el player fi undrafted so kmn badna nbadol el undrafter bi 2aleb el data 
+
+dim_player_static['draft_year'] = dim_player_static['draft_year'].replace('Undrafted', 0)
+dim_player_static['draft_round'] = dim_player_static['draft_year'].replace('Undrafted', 0)
+dim_player_static['draft_number'] = dim_player_static['draft_year'].replace('Undrafted', 0)
+
+bl table creation 
+CREATE TABLE dim_date (
+    date_id SERIAL PRIMARY KEY,
+    date DATE,
+    year INT,
+    month INT,
+    day INT
+);
+
+3mlt add w ensure enou integer bl dim_season
+
+# Convert 'season_id' and 'season_year' to Python int type (not numpy.int64)
+dim_season['season_id'] = dim_season['season_id'].astype(int)
+dim_season['season_year'] = dim_season['season_year'].astype(int)
+
+bl dynamic tali3 team id = 0 
+badna nchilou
+# Drop rows where 'team_id' is 0 using the drop method
+dim_player_dynamic = dim_player_dynamic.drop(dim_player_dynamic[dim_player_dynamic['team_id'] == 0].index)
+
+bl create player performance
+FOREIGN KEY (team_id) REFERENCES dim_team(team_id),
