@@ -24,7 +24,14 @@ Data was collected and transformed from:
 
 ## 📐 Dimensional Fact Model (DFM)
 
-![DFM](./DFM_Final.png)
+### Assuming Fact Game
+![DFM](./DFM/DFM_FG.jpg)
+
+### Assuming Fact Player Performance
+![DFM](./DFM/DFM_FPP.jpg)
+
+### Assuming 2 Facts
+![DFM](./DFM/DFM_FF.jpg)
 
 
 **Fact Table:**
