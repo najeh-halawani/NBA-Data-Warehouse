@@ -203,7 +203,7 @@ JOIN dim_player_performance pp ON pp.player_id = pd.player_id AND pp.game_id = f
 
 
 /*
-14- compute the match id, points and abbreviation of home, points of the away team, and 
+14- compute the match id, points and abbreviation of home, points of the away team, and (assuming fact player performance)
 LEBRON james performance when lebron james is in the home team
 */
 SELECT f.game_id, home.abbreviation AS lebron_team_home,f.home_points, f.visitor_points, pp.points, pp.assists
@@ -218,7 +218,7 @@ JOIN dim_player_performance pp ON pp.player_id = ps.player_id AND pp.game_id = f
 WHERE ps.player_name = 'LeBron James'
 
 /*
-15- compute the match id, points and abbreviation of home, points of the away team, and 
+15- compute the match id, points and abbreviation of home, points of the away team, and  (assuming fact player performance)
  LEBRON james performance
 */
 SELECT f.game_id, home.abbreviation AS home_team,away.abbreviation AS away_team,f.home_points, f.visitor_points, pp.points as lebron_points, pp.assists as lebron_assists
@@ -234,9 +234,9 @@ WHERE ps.player_name = 'LeBron James';
 
 
 /*
-16- Compute the query to get the player and the corresponding team name where he scored more than 50 points in a game
+16- Compute the query to get the player and the corresponding team name where he scored more than 50 points in a game (assuming fact player performance)
 */
-SELECT f.game_id, ps.player_name, t.abbreviation AS Team_Player, pp.points, d.date, home.abbreviation AS home_team, away.abbreviation AS away_team
+SELECT f.game_id, ps.player_name, t.abbreviation AS Team_Player, pp.points, d.date, home.abbreviation AS home_team, away.abbreviation AS away_team 
 FROM fact_game f 
 JOIN dim_team AS home ON f.home_team_id = home.team_id
 JOIN dim_team AS away ON f.visitor_team_id = away.team_id
@@ -247,7 +247,7 @@ JOIN dim_team t ON t.team_id = pp.team_id
 WHERE pp.points > 50
 
 /*
-17- identify players with the best shooting percentages (field goals, 3P, and free throw) in a season / over all seasons.
+17- identify players with the best shooting percentages (field goals, 3P, and free throw) in a season / over all seasons. (assuming fact player performance)
 */
 SELECT p.player_name,s.season_year,
     ROUND(AVG(pp.field_goal_percentage::numeric), 2) AS avg_fg_pct,
@@ -262,7 +262,7 @@ HAVING COUNT(pp.game_id) >= 15
 ORDER BY avg_fg_pct DESC
 
 /*
-18- returns the most efficient scorers over a season / over all seasons
+18- returns the most efficient scorers over a season / over all seasons (assuming fact player performance)
 */
 SELECT s.season_year,p.player_name,
     ROUND(AVG(pp.points), 2) AS avg_points_per_game,
