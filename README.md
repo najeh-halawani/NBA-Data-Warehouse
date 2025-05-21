@@ -92,6 +92,8 @@ The data warehouse follows a **Hybrid Star-Snowflake Schema**:
 
 Below are a set of useful SQL queries for DFM schema where the fact is the Game.
 
+Reference queries: [olap_queries.sql](olap_queries.sql)
+
 1. **Building the full cube across all dimensions**
 
 ```sql
