@@ -199,7 +199,7 @@ Below are a set of useful SQL queries for DFM schema where the fact is player_pe
 
 1. **Get the most efficient scorers over a season or over all seasons**
 ```sql
-SELECT s.season_year,`
+SELECT s.season_year,
     p.player_name,
     ROUND(AVG(pp.points), 2) AS avg_points_per_game,
     COUNT(DISTINCT pp.game_id) AS games_played
