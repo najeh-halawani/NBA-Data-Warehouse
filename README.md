@@ -87,3 +87,177 @@ The data warehouse follows a **Hybrid Star-Snowflake Schema**:
 
 ## 📊 OLAP Session Queries
 
+
+### Assuming Fact Game
+
+Below are a set of useful SQL queries for DFM schema where the fact is the Game.
+
+1. **Building the full cube across all dimensions**
+
+```sql
+SELECT *
+FROM fact_game f
+JOIN dim_team AS home
+  ON f.home_team_id = home.team_id
+JOIN dim_team AS away
+  ON f.visitor_team_id = away.team_id
+JOIN dim_season s
+  ON f.season_id = s.season_id
+JOIN dim_date d
+  ON f.date_id = d.date_id
+JOIN dim_ranking r
+  ON r.team_id = f.home_team_id
+  AND r.season_id = s.season_id
+JOIN dim_player_dynamic pd
+  ON pd.team_id = f.home_team_id
+  AND pd.season_id = s.season_id
+JOIN dim_player_static ps
+  ON pd.player_id = ps.player_id
+JOIN dim_player_performance pp
+  ON pp.player_id = pd.player_id
+  AND pp.game_id = f.game_id;
+```
+2. **Roll-up: Average points scored per team per month**
+```sql
+SELECT
+  d.year,
+  d.month,
+  t.team_id,
+  t.abbreviation,
+  ROUND(
+    AVG(
+      CASE
+        WHEN f.home_team_id = t.team_id THEN f.home_points
+        WHEN f.visitor_team_id = t.team_id THEN f.visitor_points
+        ELSE 0
+      END
+    ), 2
+  ) AS avg_points_per_game
+FROM fact_game f
+JOIN dim_team t
+  ON t.team_id IN (f.home_team_id, f.visitor_team_id)
+JOIN dim_date d
+  ON f.date_id = d.date_id
+WHERE d.year > 2003
+GROUP BY d.year, d.month, t.team_id, t.abbreviation
+ORDER BY avg_points_per_game DESC;
+```
+
+3. **DICE: Filter by year and team abbreviation**
+```sql
+SELECT
+  f.game_id,
+  d.year,
+  home.team_id,
+  home.abbreviation AS home_team,
+  away.team_id AS away_team,
+  away.abbreviation,
+  f.home_points,
+  f.visitor_points
+FROM fact_game f
+JOIN dim_team AS home
+  ON f.home_team_id = home.team_id
+JOIN dim_team AS away
+  ON f.visitor_team_id = away.team_id
+JOIN dim_date d
+  ON f.date_id = d.date_id
+WHERE d.year = 2022
+  AND (
+    home.abbreviation = 'CLE'
+    OR away.abbreviation = 'CLE'
+  );
+```
+4. **Retrieve games where a player scored more than 50 points**
+```sql
+SELECT
+  f.game_id,
+  ps.player_name,
+  t.abbreviation AS team_player,
+  pp.points,
+  d.date,
+  home.abbreviation AS home_team,
+  away.abbreviation AS away_team
+FROM fact_game f
+JOIN dim_team AS home
+  ON f.home_team_id = home.team_id
+JOIN dim_team AS away
+  ON f.visitor_team_id = away.team_id
+JOIN dim_date d
+  ON f.date_id = d.date_id
+JOIN dim_player_performance pp
+  ON pp.game_id = f.game_id
+JOIN dim_player_static ps
+  ON ps.player_id = pp.player_id
+JOIN dim_team t
+  ON t.team_id = pp.team_id
+WHERE pp.points > 50;
+```
+
+### Assuming Fact Player Performance
+
+Below are a set of useful SQL queries for DFM schema where the fact is player_performance.
+
+1. **Get the most efficient scorers over a season or over all seasons**
+```sql
+SELECT s.season_year,`
+    p.player_name,
+    ROUND(AVG(pp.points), 2) AS avg_points_per_game,
+    COUNT(DISTINCT pp.game_id) AS games_played
+FROM dim_player_performance pp
+JOIN dim_player_static p 
+  ON p.player_id = pp.player_id
+JOIN fact_game f 
+  ON f.game_id = pp.game_id
+JOIN dim_season s 
+  ON s.season_id = f.season_id
+WHERE s.season_year = 2022
+GROUP BY s.season_year, 
+  p.player_name
+HAVING COUNT(DISTINCT pp.game_id) >= 10
+ORDER BY avg_points_per_game DESC
+```
+
+2. **analyze how win rates evolve per month over the seasons for each team**
+
+```sql
+SELECT
+  s.season_year,
+  d.month,
+  t.nickname,
+  COUNT(*) FILTER (
+    WHERE (f.home_team_id = t.team_id AND f.home_team_wins)
+       OR (f.visitor_team_id = t.team_id AND NOT f.home_team_wins)
+  ) AS wins,
+  COUNT(*) FILTER (
+    WHERE f.home_team_id = t.team_id
+       OR f.visitor_team_id = t.team_id
+  ) AS total_games,
+  ROUND(
+    COUNT(*) FILTER (
+      WHERE (f.home_team_id = t.team_id AND f.home_team_wins)
+         OR (f.visitor_team_id = t.team_id AND NOT f.home_team_wins)
+    ) * 100.0 /
+    COUNT(*) FILTER (
+      WHERE f.home_team_id = t.team_id
+         OR f.visitor_team_id = t.team_id
+    ), 2
+  ) AS win_rate_percentage
+FROM fact_game f
+JOIN dim_team t
+  ON t.team_id IN (f.home_team_id, f.visitor_team_id)
+JOIN dim_date d
+  ON d.date_id = f.date_id
+JOIN dim_season s
+  ON s.season_id = f.season_id
+GROUP BY s.season_year, d.month, t.nickname
+ORDER BY s.season_year, d.month, win_rate_percentage DESC;
+```
+
+## 📊 Tableau Dashboard
+
+We’ve built an interactive dashboard in Tableau to help you explore the data more deeply. You can view it here:
+
+[🔗 View the Tableau Dashboard](https://public.tableau.com/app/profile/jamil.nassar/viz/NBA_Data_Warehouse/Sheet1)
+
+
+
