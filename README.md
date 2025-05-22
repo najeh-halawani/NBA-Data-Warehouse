@@ -77,7 +77,7 @@ Key transformation steps include:
 
 
 
-## 🔀 Hybrid Schema
+## 🔀 Snowflake Schema
 
 The data warehouse follows a **Snowflake Schema**:
 - Snowflake branches to player performance and rankings:
