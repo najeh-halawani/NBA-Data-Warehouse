@@ -219,40 +219,23 @@ HAVING COUNT(DISTINCT pp.game_id) >= 10
 ORDER BY avg_points_per_game DESC
 ```
 
-2. **analyze how win rates evolve per month over the seasons for each team**
+2. **identify players with the best shooting percentages (field goals, 3P, and free throw) in a season / over all seasons.**
 
 ```sql
-SELECT
-  s.season_year,
-  d.month,
-  t.nickname,
-  COUNT(*) FILTER (
-    WHERE (f.home_team_id = t.team_id AND f.home_team_wins)
-       OR (f.visitor_team_id = t.team_id AND NOT f.home_team_wins)
-  ) AS wins,
-  COUNT(*) FILTER (
-    WHERE f.home_team_id = t.team_id
-       OR f.visitor_team_id = t.team_id
-  ) AS total_games,
-  ROUND(
-    COUNT(*) FILTER (
-      WHERE (f.home_team_id = t.team_id AND f.home_team_wins)
-         OR (f.visitor_team_id = t.team_id AND NOT f.home_team_wins)
-    ) * 100.0 /
-    COUNT(*) FILTER (
-      WHERE f.home_team_id = t.team_id
-         OR f.visitor_team_id = t.team_id
-    ), 2
-  ) AS win_rate_percentage
-FROM fact_game f
-JOIN dim_team t
-  ON t.team_id IN (f.home_team_id, f.visitor_team_id)
-JOIN dim_date d
-  ON d.date_id = f.date_id
-JOIN dim_season s
+SELECT p.player_name,s.season_year,
+    ROUND(AVG(pp.field_goal_percentage::numeric), 2) AS avg_fg_pct,
+    ROUND(AVG(pp.three_pointer_percentage::numeric), 2) AS avg_3p_pct,
+    ROUND(AVG(pp.free_throw_percentage::numeric), 2) AS avg_ft_pct
+FROM dim_player_performance pp
+JOIN dim_player_static p 
+  ON p.player_id = pp.player_id
+JOIN fact_game f 
+  ON f.game_id = pp.game_id
+JOIN dim_season s 
   ON s.season_id = f.season_id
-GROUP BY s.season_year, d.month, t.nickname
-ORDER BY s.season_year, d.month, win_rate_percentage DESC;
+GROUP BY p.player_name,s.season_year
+HAVING COUNT(pp.game_id) >= 15
+ORDER BY avg_fg_pct DESC
 ```
 
 ## 📊 Tableau Dashboard
