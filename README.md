@@ -79,8 +79,7 @@ Key transformation steps include:
 
 ## 🔀 Hybrid Schema
 
-The data warehouse follows a **Hybrid Star-Snowflake Schema**:
-- Core star schema around `fact_game` and `dim_team`, `dim_date`, `dim_season`.
+The data warehouse follows a **Snowflake Schema**:
 - Snowflake branches to player performance and rankings:
   - `dim_player_dynamic` and `dim_player_static` normalize player history.
   - `dim_ranking` adds a secondary analytical axis (team season performance).
