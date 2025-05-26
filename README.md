@@ -241,7 +241,7 @@ ORDER BY avg_fg_pct DESC
 
 We’ve built an interactive dashboard in Tableau to help you explore the data more deeply. You can view it here:
 
-[🔗 View the Tableau Dashboard](https://public.tableau.com/app/profile/jamil.nassar/viz/NBA_Data_Warehouse/Sheet1)
+[🔗 View the Tableau Dashboard](https://public.tableau.com/app/profile/jamil.nassar/viz/Data_Warehouse_NBA/Sheet4)
 
 
 
